@@ -266,6 +266,9 @@ flowchart TD
 
 For a deeper dive into the flows and trade-offs, see the files in `docs/`. For a more product-like view, run the CLI, inspect the stored leads in the Streamlit dashboard, and use the simulation script to stress-test how the system behaves across many synthetic prospects.
 
+
+---
+
 ## Push your changes to github
 
 cd "path/to/your/folder"
@@ -281,3 +284,89 @@ git branch -M main
 git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
 
 git push -u origin main
+
+
+---
+
+## How do I get changes from GitHub down to my local folder
+
+- If your local repo is already connected to GitHub
+From the project folder:
+
+```bash
+cd "path/to/your/folder"
+git pull origin main
+```
+
+That means:
+- `origin` = your GitHub repo
+- `main` = your branch name
+
+If your current branch already tracks `origin/main`, you can just run:
+
+```bash
+git pull
+```
+
+### Good safe workflow
+Before pulling, check whether you have local edits:
+
+```bash
+git status
+```
+
+Then:
+
+1. If working tree is clean, run:
+```bash
+git pull
+```
+
+2. If you have local changes, either:
+- commit them first, then pull
+- or stash them temporarily:
+```bash
+git stash
+git pull
+git stash pop
+```
+
+### If this folder is not yet a git repo
+Then first you need to clone it or connect it.
+
+### Option 1: clone fresh from GitHub
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+```
+
+### Option 2: connect your existing local folder
+If you already created the repo locally and pushed once, future updates are just:
+
+```bash
+git pull origin main
+```
+
+### If Git says there is a merge conflict
+That means both local and GitHub changed the same lines.
+
+Workflow:
+1. Run `git status`
+2. Open the conflicted files
+3. Choose what to keep
+4. Then:
+```bash
+git add .
+git commit -m "Resolve merge conflict"
+```
+
+### If you want the newest remote branch list too
+Use:
+
+```bash
+git fetch --all
+```
+
+Then inspect:
+```bash
+git branch -a
+```
