@@ -1,0 +1,8 @@
+.firecrawl/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+LINKEDIN_POST.md
+gatekeeper.db

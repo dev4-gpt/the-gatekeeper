@@ -1,0 +1,5 @@
+# Python 3.9+.
+streamlit
+pandas
+google-genai
+python-dotenv
