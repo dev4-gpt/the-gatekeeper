@@ -70,6 +70,64 @@ streamlit run dashboard.py
 python simulate_1000_leads.py
 ```
 
+- **Run the FastAPI service:**
+
+```bash
+uvicorn api.app:app --reload
+```
+
+The API listens on `http://127.0.0.1:8001`. Check on `http://127.0.0.1:8001/docs`.
+Use `GET /health` for readiness and `POST /qualify` to qualify a lead from BANT answers. See the API section below for request/response examples.
+
+---
+
+## Service architecture
+
+```mermaid
+flowchart TD
+  inboundLead[Inbound Lead] --> apiLayer[FastAPI Service]
+  apiLayer --> engineLayer[Gatekeeper Engine]
+  engineLayer --> storageLayer[SQLite Lead Store]
+  storageLayer --> dashboardLayer[Streamlit Dashboard]
+  engineLayer --> responseLayer[Qualification Response]
+```
+
+The system can be called from CRMs, web forms, chatbots, or sales automation tools. The CLI, dashboard, and API all use the same engine and storage.
+
+---
+
+## API
+
+**POST /qualify** — Submit BANT answers and receive a decision, score, and per-dimension breakdown.
+
+**Request:**
+
+```json
+{
+  "need": "improve retention",
+  "authority": "I sign off",
+  "budget": "we have around 10k",
+  "timeline": "this quarter"
+}
+```
+
+**Response:**
+
+```json
+{
+  "decision": "book_ae",
+  "reason": "strong_fit",
+  "score": 87,
+  "confidence_band": "high",
+  "scores_numeric": {"need": 2, "authority": 2, "budget": 2, "timeline": 2},
+  "scores_labels": {"need": "green", "authority": "green", "budget": "green", "timeline": "green"},
+  "message": "I'd love to get you on a call with our team. [Book AE]",
+  "lead_id": 1
+}
+```
+
+When more info is needed, `decision` will be `"need_more_info"` and `message` contains the next question to ask. Interactive API docs are at `http://127.0.0.1:8000/docs` when the service is running.
+
 ---
 
 ## What it does
@@ -152,6 +210,9 @@ flowchart TD
 - **Persistence and dashboard**  
   `gatekeeper/storage.py` writes lead records to SQLite. `dashboard.py` reads the same records and shows lead outcome, score, confidence, BANT breakdown, recap, and next-step explanation in a simple review UI.
 
+- **API layer**  
+  `api/app.py` exposes a FastAPI service with `GET /health` and `POST /qualify`. The API runs the same engine and storage layer as the CLI and dashboard, so the system can be called from CRMs, forms, or automation tools.
+
 - **Simulation**  
   `simulate_1000_leads.py` generates synthetic answer combinations to pressure-test routing outcomes and score distributions without manually running hundreds of conversations.
 
@@ -159,7 +220,7 @@ flowchart TD
   `.env` loading is automatic through `python-dotenv`, so local CLI, dashboard, and simulation runs pick up `GOOGLE_API_KEY` without extra shell setup.
 
 - **Tests**  
-  `tests/test_engine.py`: strong-fit → book_ae, red budget → disqualify, "not sure" budget → nurture. Run: `python -m unittest discover -s tests -p 'test_*.py'`.
+  `tests/test_engine.py`: strong-fit → book_ae, red budget → disqualify, "not sure" budget → nurture. `tests/test_api.py`: health endpoint and qualify endpoint (strong-fit, disqualify). Run: `python -m unittest discover -s tests -p 'test_*.py'`.
 
 ---
 
@@ -237,6 +298,9 @@ flowchart TD
   - `03-human-escalation-rules.md` – When to escalate, continue, or stop
   - `04-optimization-plan.md` – What to analyze and improve after 30 days
   - `05-qa-edge-cases.md` – Internal QA scenarios for stress-testing messy conversations
+- **`api/`** – FastAPI service:
+  - `app.py` – FastAPI entrypoint with `GET /health` and `POST /qualify`
+  - `schemas.py` – Request/response Pydantic models
 - **`gatekeeper/`** – Core logic:
   - `criteria.py` – Questions and scoring rules per BANT dimension
   - `engine.py` – Qualification engine, routing logic, and numeric lead score helper
@@ -249,7 +313,7 @@ flowchart TD
   - Shows the recap + explanation and asks for confirmation
 - **`dashboard.py`** – Streamlit app that lists leads, shows their BANT breakdown, and exposes recap + explanation in a web UI
 - **`simulate_1000_leads.py`** – Script that generates synthetic leads and prints a summary of outcomes and score distributions
-- **`tests/`** – Unit tests for core qualification logic
+- **`tests/`** – Unit tests for core qualification logic (`test_engine.py`) and API (`test_api.py`)
 
 ---
 
