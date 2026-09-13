@@ -6,3 +6,4 @@ venv/
 .env
 LINKEDIN_POST.md
 gatekeeper.db
+.DS_Store
