@@ -149,7 +149,7 @@ def run(answers: dict[str, str], escalation_requested: bool = False) -> EngineRe
     # green = 2. Book AE if: 4 green, or 3 green and the only yellow is timeline
     greens = sum(1 for v in (b, a, n, t) if v == 2)
     ban_green = (b == 2) + (a == 2) + (n == 2)
-    if greens >= 3 and (t == 2 or (ban_green == 3 and t == 1)):
+    if greens == 4 or (ban_green == 3 and t == 1):
         return EngineResult(
             outcome=OUTCOME_BOOK_AE,
             action=ACTION_DONE,

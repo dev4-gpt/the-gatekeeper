@@ -38,6 +38,26 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(result["reason"], "soft_fit")
 
 
+    def test_only_timeline_yellow_still_books_an_ae(self) -> None:
+        answers = {
+            "need": "retention and burnout",
+            "authority": "i sign off",
+            "budget": "we have budget allocated",
+            "timeline": "no rush",
+        }
+        result = run(answers)
+        self.assertEqual(result["outcome"], OUTCOME_BOOK_AE)
+
+    def test_three_green_with_budget_yellow_is_not_enough_to_book(self) -> None:
+        answers = {
+            "need": "retention and burnout",
+            "authority": "i sign off",
+            "budget": "not sure yet, would need approval",
+            "timeline": "this quarter",
+        }
+        self.assertEqual(run(answers)["outcome"], OUTCOME_NURTURE)
+
+
 if __name__ == "__main__":
     unittest.main()
 
