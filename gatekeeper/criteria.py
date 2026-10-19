@@ -69,7 +69,7 @@ def _contains(text: str, phrase: str) -> bool:
         return False
     # For simple alphabetic tokens without spaces, use word boundaries.
     if phrase.isalpha() and " " not in phrase:
-        return bool(re.search(rf"\\b{re.escape(phrase)}\\b", text))
+        return bool(re.search(rf"\b{re.escape(phrase)}\b", text))
     return phrase in text
 
 
@@ -94,7 +94,7 @@ def _score_wordlist(text: str, green: Tuple[str, ...], yellow: Tuple[str, ...], 
 def score_budget(answer: str) -> int:
     # First, see if they mentioned a concrete amount.
     if answer:
-        nums = re.findall(r"\\d+(?:\\.\\d+)?", answer.replace(",", ""))
+        nums = re.findall(r"\d+(?:\.\d+)?", answer.replace(",", ""))
         if nums:
             try:
                 amount = float(nums[0])
